@@ -7,6 +7,12 @@ const url = 'https://api.themoviedb.org/3/search/movie?api_key=031112608a39b5e69
 const buttonElement = document.querySelector('#search');
 const inputElement = document.querySelector('#inputValue');
 const movieSearchable = document.querySelector('#movies-searchable');
+const imgElement = document.querySelector('img');
+
+function generateUrl(path) {
+    const url = `https://api.themoviedb.org/3${path}?api_key=031112608a39b5e696044896a9a5bc50`;
+    return url;
+}
 
 
 
@@ -52,8 +58,8 @@ function renderSearchMovies(data){
 buttonElement.onclick = function (event){
     event.preventDefault();
     const value = inputElement.value;
-
-    const newUrl = url + '&query=' + value;
+    const path = '/search/movie';
+    const newUrl = generateUrl(path) + '&query=' + value;
 
         fetch(newUrl)
         .then((res) => res.json())
@@ -67,19 +73,58 @@ buttonElement.onclick = function (event){
    
 }
 
+function createIframe(video) {
+    const iframe = document.createElement('iframe');
+    iframe.src = `https:/www.youtube.com/embed/${video.key}`;
+    iframe.width = 360;
+    iframe.height = 315;
+    iframe.allowFullscreen = true;
+
+    return iframe;
+}
+
 // event delegation 
 document.onclick = function (event){
     const target = event.target;
-    if (target.tagName.toLowerCase() === 'img'){
-    console.log('hello world');
-    const section = event.target.parentElement ; //section
-    const content = section.nextElementSibling; //content 
-    content.classList.add('content-display');
+    if (target.tagName.toLowerCase() === 'img') {
+        
+        const movieId = target.dataset.movieId;
+        console.log('Movie ID: ', movieId);
+        const section = event.target.parentElement ; //section
+        const content = section.nextElementSibling; //content 
+        content.classList.add('content-display');
+
+        const path = `/movie/${movieId}/videos`;
+        const url = generateUrl(path);
+        fetch(url)
+        .then((res) => res.json())
+            .then((data) => {
+            //TODO
+                //display movies
+                console.log('Videos : ', data);
+                const videos = data.results;
+                const lenght = videos.lenght > 4 ? 4 : videos.lenght;
+                const iframeContainer = document.createElement('div');
+
+                for (let i = 0; i < lenght;i++){
+                    const video = videos[i]; // video
+                    const iframe = createIframe(video);
+                    iframeContainer.appendChild(iframe);
+                    content.appendChild(iframeContainer);
+                }
+                
+                
+        })
+        .catch((error) => {
+            console.log('error : ', error);
+        });
+
 
 }
    if(target.id === 'content-close'){
-    const content = target.parentElement;
-    content.classList.remove('content-display');  
+        const content = target.parentElement;
+        content.classList.remove('content-display');  
 
    } 
 }
+
