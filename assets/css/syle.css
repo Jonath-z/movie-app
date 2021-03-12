@@ -33,6 +33,11 @@
 
 #movies-searchable {
     margin-top : 20px;
+    margin-bottom: 50px;
+}
+
+.movie{
+    margin-bottom: 50px;
 }
 
 section{
@@ -52,9 +57,23 @@ img:hover{
 }
 
 .content {
-    border : 1px solid red;
-    height: 300px;
+    border : 1px solid lightgray;
+    padding: 20px;
     display: none;
+}
+
+.content-close{
+    cursor: pointer;
+    
+}
+
+.content div {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 10px;
+
 }
 
 .content-display{

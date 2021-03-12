@@ -1,74 +1,71 @@
-//initial value 
-const API_key = '031112608a39b5e696044896a9a5bc50';
-const IMGAGE_URL = 'https://image.tmdb.org/t/p/w500';
-const url = 'https://api.themoviedb.org/3/search/movie?api_key=031112608a39b5e696044896a9a5bc50';
-
 
 const buttonElement = document.querySelector('#search');
 const inputElement = document.querySelector('#inputValue');
 const movieSearchable = document.querySelector('#movies-searchable');
 const imgElement = document.querySelector('img');
+const moviesContainer = document.querySelector('#movies-container');
 
-function generateUrl(path) {
-    const url = `https://api.themoviedb.org/3${path}?api_key=031112608a39b5e696044896a9a5bc50`;
-    return url;
+
+function movieSection(movies) {
+    const section = document.createElement('section');
+    section.classList = 'section';
+    movies.map((movie) => {
+        if (movie.poster_path) {
+            const img = document.createElement('img');
+            img.src = IMGAGE_URL + movie.poster_path;
+            img.setAttribute('data-movie-id', movie.id)
+            section.appendChild(img);
+        }
+    })
+    return section;
 }
 
-
-
-function movieSection(movies){
-   return movies.map((movie) => {
-       if (movie.poster_path){
-         return `
-         <img 
-         src=${IMGAGE_URL + movie.poster_path}
-         data-movie-id=${movie.id}
-         />`;}
-     }) 
-}
-
-function createMovieContenainer(movies){
+function createMovieContenainer(movies,title = ''){
     const movieElement = document.createElement('div');
-    movieElement.setAttribute('class','movie');
+    movieElement.setAttribute('class', 'movie');
+    const header = document.createElement('h2');
+    header.innerHTML = title;
+    const content = document.createElement('div');
+    content.classList = 'content';
 
-    const movieTemplate = `
-    <section class="section">
-     ${movieSection(movies)}
-    </section>
-    <div class="content">
-    <p id="content-close">X</p>
-    </div>
-    `;
+    const contentClose = `<p id="content-close"></p>`
+    content.innerHTML = contentClose;
+    const section = movieSection(movies);
 
-    movieElement.innerHTML =  movieTemplate;
+    movieElement.appendChild(header);
+    movieElement.appendChild(section);
+    movieElement.appendChild(content);
     return movieElement;
 
 }
 
-function renderSearchMovies(data){
+function renderSearchMovies(data) {
 
-            movieSearchable.innerHTML = '';
-            const movies = data.results;
-            const movieBlock = createMovieContenainer(movies);
-            movieSearchable.appendChild(movieBlock);
-            console.log('data: ' ,data);
+    movieSearchable.innerHTML = '';
+    const movies = data.results;
+    const movieBlock = createMovieContenainer(movies);
+    movieSearchable.appendChild(movieBlock);
+    console.log('data: ', data);
+}
+
+function renderMovies(data){
+    const movies = data.results;
+    const movieBlock = createMovieContenainer(movies, this.title);
+    moviesContainer.appendChild(movieBlock);
+    console.log('data: ' ,data);
+}
+
+
+function hundleError(error) {
+    console.log('error: ', error);
 }
 
 
 buttonElement.onclick = function (event){
     event.preventDefault();
     const value = inputElement.value;
-    const path = '/search/movie';
-    const newUrl = generateUrl(path) + '&query=' + value;
-
-        fetch(newUrl)
-        .then((res) => res.json())
-        .then( renderSearchMovies)
-        .catch((error) => {
-            console.log('error : ', error);
-        });
-
-        inputElement.value = '';
+    searchMovie(value);
+    inputElement.value = '';
     console.log('value : ',value);
    
 }
@@ -81,6 +78,24 @@ function createIframe(video) {
     iframe.allowFullscreen = true;
 
     return iframe;
+}
+
+function createVideoTemplate(data, content) {
+     //TODO
+                //display movies
+    content.innerHTML = '<p id="content-close"></p>';
+    console.log('Videos : ', data);
+    const videos = data.results;
+    const length = videos.lenght > 4 ? 4 : videos.length;
+    const iframeContainer = document.createElement('div');
+
+    for (let i = 0; i < length;i++){
+        const video = videos[i]; // video
+        const iframe = createIframe(video);
+        iframeContainer.appendChild(iframe);
+        content.appendChild(iframeContainer);
+
+     }
 }
 
 // event delegation 
@@ -98,23 +113,7 @@ document.onclick = function (event){
         const url = generateUrl(path);
         fetch(url)
         .then((res) => res.json())
-            .then((data) => {
-            //TODO
-                //display movies
-                console.log('Videos : ', data);
-                const videos = data.results;
-                const lenght = videos.lenght > 4 ? 4 : videos.lenght;
-                const iframeContainer = document.createElement('div');
-
-                for (let i = 0; i < lenght;i++){
-                    const video = videos[i]; // video
-                    const iframe = createIframe(video);
-                    iframeContainer.appendChild(iframe);
-                    content.appendChild(iframeContainer);
-                }
-                
-                
-        })
+        .then((data) => createVideoTemplate(data, content))
         .catch((error) => {
             console.log('error : ', error);
         });
@@ -128,3 +127,10 @@ document.onclick = function (event){
    } 
 }
 
+searchMovie('Spiderman');
+
+getUpComingMovies();
+
+getTopRatedMovies();
+
+getPopularMovies();
